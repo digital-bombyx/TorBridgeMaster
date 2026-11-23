@@ -2,14 +2,14 @@
 # Downloads the bridge list, runs the scanner, and opens the HTML report.
 
 $workdir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$url = 'https://raw.githubusercontent.com/Delta-Kronecker/Tor-Bridges-Collector/refs/heads/main/bridge/obfs4_tested.txt'
+$url = 'https://raw.githubusercontent.com/scriptzteam/Tor-Bridges-Collector-v2/main/bridges/obfs4_tested.txt'
 $br_file = Join-Path $workdir 'obfs4_tested.txt'
 
 Write-Host "============================================================"
 Write-Host "Tor Bridge Master"
 Write-Host "============================================================"
 Write-Host "Special thanks to:"
-Write-Host "  https://github.com/Delta-Kronecker/Tor-Bridges-Collector"
+Write-Host "  https://github.com/scriptzteam/Tor-Bridges-Collector-v2"
 Write-Host "  https://gist.github.com/Satyani/409d5f14a6cd2ab57024e5c7326ca78a"
 Write-Host "============================================================"
 Write-Host ""
@@ -25,11 +25,14 @@ try {
     exit 1
 }
 
-# Locate Python
+# Locate Python — prefer 'py' launcher, skip WindowsApps stubs for python/python3
 $pythonCmd = $null
-foreach ($cmd in @('python', 'python3', 'py')) {
+foreach ($cmd in @('py', 'python', 'python3')) {
     try {
-        $null = Get-Command $cmd -ErrorAction Stop
+        $found = Get-Command $cmd -ErrorAction Stop
+        # py.exe in WindowsApps is the real Python Launcher — allow it
+        # python.exe / python3.exe in WindowsApps are Microsoft Store stubs — skip
+        if ($cmd -ne 'py' -and $found.Source -like '*\WindowsApps\*') { continue }
         $pythonCmd = $cmd
         break
     } catch {}
@@ -38,6 +41,7 @@ foreach ($cmd in @('python', 'python3', 'py')) {
 if (-not $pythonCmd) {
     Write-Host "[ERR] Python not found! Install Python 3 from python.org" -ForegroundColor Red
     Write-Host "      Make sure to check 'Add Python to PATH' during installation"
+    Write-Host "      Or install the Python Launcher (py.exe) which is included by default"
     pause
     exit 1
 }

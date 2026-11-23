@@ -99,25 +99,32 @@ def find_executable(name: str, extra_paths: List[str]) -> Optional[str]:
     return None
 
 
+def tor_browser_dirs() -> List[str]:
+    """Возможные папки Tor Browser: TOR_BROWSER_DIR, типичные места и корни всех дисков."""
+    dirs = [
+        os.environ.get("TOR_BROWSER_DIR", ""),
+        os.path.expandvars(r"%USERPROFILE%\Desktop\Tor Browser"),
+        os.path.expandvars(r"%LOCALAPPDATA%\Tor Browser"),
+        r"C:\Program Files\Tor Browser",
+    ]
+    dirs += [rf"{d}:\Tor Browser" for d in "CDEFGHIJKLMNOPQRSTUVWXYZ"]
+    return [d for d in dirs if d]
+
+
 def find_tor() -> Optional[str]:
     """Путь к tor.exe (PATH или установка Tor Browser)."""
-    candidates = [
-        os.path.expandvars(r"%USERPROFILE%\Desktop\Tor Browser\Browser\TorBrowser\Tor\tor.exe"),
-        os.path.expandvars(r"%LOCALAPPDATA%\Tor Browser\Browser\TorBrowser\Tor\tor.exe"),
-        r"C:\Program Files\Tor Browser\Browser\TorBrowser\Tor\tor.exe",
-    ]
-    return find_executable("tor", candidates)
+    tor = r"Browser\TorBrowser\Tor\tor.exe"
+    return find_executable("tor", [os.path.join(d, tor) for d in tor_browser_dirs()])
 
 
 def find_obfs4proxy() -> Optional[str]:
-    """Путь к obfs4proxy.exe (PATH или Pluggable Transports Tor Browser)."""
-    pt = r"Browser\TorBrowser\Tor\PluggableTransports\obfs4proxy.exe"
-    candidates = [
-        os.path.expandvars(rf"%USERPROFILE%\Desktop\Tor Browser\{pt}"),
-        os.path.expandvars(rf"%LOCALAPPDATA%\Tor Browser\{pt}"),
-        rf"C:\Program Files\Tor Browser\{pt}",
-    ]
-    return find_executable("obfs4proxy", candidates)
+    """Путь к клиенту obfs4: lyrebird.exe в новых Tor Browser, obfs4proxy.exe в старых."""
+    pt = r"Browser\TorBrowser\Tor\PluggableTransports"
+    for name in ("lyrebird", "obfs4proxy"):
+        found = find_executable(name, [os.path.join(d, pt, f"{name}.exe") for d in tor_browser_dirs()])
+        if found:
+            return found
+    return None
 
 
 class BridgeScanner:
@@ -156,7 +163,7 @@ class BridgeScanner:
             if not self.tor_path:
                 missing.append("tor")
             if not self.obfs4proxy_path:
-                missing.append("obfs4proxy")
+                missing.append("lyrebird/obfs4proxy")
             self.logger.warning(
                 f"Не найдены: {', '.join(missing)}. obfs4-хендшейк пропускается, "
                 f"используется только TCP-проверка (порт открыт + задержка)."

@@ -49,7 +49,7 @@ TCP-проверка (флаг `--no-verify` отключает шаг 2 при�
 | `--no-verify` | — | только TCP-проверка (быстрее) |
 
 ### Благодарности
-- <https://github.com/Delta-Kronecker/Tor-Bridges-Collector>
+- <https://github.com/scriptzteam/Tor-Bridges-Collector-v2>
 - <https://gist.github.com/Satyani/409d5f14a6cd2ab57024e5c7326ca78a>
 - Author: [tglagcs](https://github.com/tglagcs)
 
@@ -94,6 +94,6 @@ If `tor`/`obfs4proxy` are missing, step 2 is skipped with a warning — only the
 | `--no-verify` | — | TCP check only (faster) |
 
 ### Credits
-- <https://github.com/Delta-Kronecker/Tor-Bridges-Collector>
+- <https://github.com/scriptzteam/Tor-Bridges-Collector-v2>
 - <https://gist.github.com/Satyani/409d5f14a6cd2ab57024e5c7326ca78a>
 - Author: [tglagcs](https://github.com/tglagcs)
